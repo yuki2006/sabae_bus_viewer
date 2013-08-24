@@ -10,6 +10,47 @@ $(function() {
 		/* 地図タイプ */
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
+
+	function getCurrentArea(latitude, longitude) {
+		
+
+		var lat = (latitude + "").substring(0, 8);
+		var lon = (longitude + "").substring(0, 8);
+		var type = $("#shopList").val();
+		var url = 'http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];(node(around:250,' + lat + ',' + lon + ')[' + type + '];way(around:250,' + lat + ',' + lon + ')[' + type + '];);(._;>;);out body;';
+		$.getJSON(url, function(data) {
+
+				for (var i in data.elements) {
+					var p = data.elements[i];
+
+
+					var tagHTML = p.tags.name;
+					if (p.tags.phone) {
+						tagHTML += "<br />phone " + p.tags.phone
+					}
+					if (p.tags.website) {
+						tagHTML += "<br />Website <a href='" + p.tags.website + "'>" + p.tags.website + "</a>"
+					}
+
+
+					var pos = new google.maps.LatLng(p.lat, p.lon);
+					var marker = new google.maps.Marker({
+						position: pos,
+						map: map,
+						title: p.tags.name
+					});
+
+					var infowindow = new google.maps.InfoWindow({
+						content: tagHTML
+					});
+
+					google.maps.event.addListener(marker, 'click', function() {
+						infowindow.open(map, this);
+					});
+
+				};
+		});
+	}
 	var map = new google.maps.Map(document.getElementById("map_canvas"),
 		mapOptions);
 	var position;
@@ -21,44 +62,7 @@ $(function() {
 			position: myLatLng,
 			map: map,
 		});
-		var lat = (position.latitude + "").substring(0, 8);
-		var lon = (position.longitude + "").substring(0, 8);
-		var type = "amenity=restaurant"
-		var url = 'http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];(node(around:250,' + lat + ',' + lon + ')[' + type + '];way(around:250,' + lat + ',' + lon + ')[' + type + '];);(._;>;);out body;';
-		$.getJSON(url, function(data) {
-			console.log(url);
-			console.log(data);
 
-			for (var i in data.elements) {
-				var p=data.elements[i];
-
-
-				var tagHTML=p.tags.name;
-				if (p.tags.phone){
-					tagHTML+="<br />phone "+p.tags.phone
-				}
-				if (p.tags.website){
-					tagHTML+="<br />Website <a href='"+p.tags.website+"'>"+p.tags.website+"</a>"
-				}
-
-
-				var pos = new google.maps.LatLng(p.lat, p.lon);
-				var marker = new google.maps.Marker({
-					position: pos,
-					map: map,
-					title: p.tags.name 
-				});
-
-				var infowindow = new google.maps.InfoWindow({
-					content: tagHTML
-				});
-
-				google.maps.event.addListener(marker, 'click', function() {
-					infowindow.open(map, this);
-				});
-			}
-
-		});
 
 		console.log(position.latitude, position.longitude);
 	});
@@ -82,6 +86,12 @@ $(function() {
 					});
 
 					google.maps.event.addListener(marker, 'click', function() {
+						console.log(this);
+
+						getCurrentArea(this.position.mb, this.position.nb);
+						map.panTo(new google.maps.LatLng(this.position.mb, this.position.nb));
+
+
 						infowindow.open(map, this);
 					});
 

@@ -15,14 +15,23 @@ $(function() {
 	var position;
 
 	navigator.geolocation.getCurrentPosition(function(_position) {
-		position = _position;
-		var myLatLng = new google.maps.LatLng(busstop.latitude, busstop.longitude);
+		position = _position.coords;
+		var myLatLng = new google.maps.LatLng(position.latitude, position.longitude);
 		var beachMarker = new google.maps.Marker({
 			position: myLatLng,
 			map: map,
 		});
+		var lat=(position.latitude+"").substring(0,8);
+		var lon=(position.longitude+"").substring(0,8);
+		var type="amenity=restaurant"
+		var url='http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];(node(around:250,'+lat+','+lon+')['+type+'];way(around:250,'+lat+','+lon+')['+type+'];);(._;>;);out body;';
+		$.getJSON(url,function(data){
+			console.log(url);
+			console.log(data);
 
-		console.log(position.coords.latitude);
+		});
+
+		console.log(position.latitude,position.longitude);
 	});
 
 

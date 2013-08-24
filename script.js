@@ -29,23 +29,36 @@ $(function() {
 			console.log(url);
 			console.log(data);
 
+
+
 		});
 
 		console.log(position.latitude,position.longitude);
 	});
 
-
+// バス路線をすべて読み込み
 	for (var i = 1; i < 10; i++) {
 		$.getJSON("http://tutujibus.com/busstopLookup.php?rosenid=" + i + "&callback=?",
 			function(data) {
 				for (var i in data.busstop) {
+					console.log(data.busstop[i])
 					var busstop = data.busstop[i];
 					var busLatLng = new google.maps.LatLng(busstop.latitude, busstop.longitude);
-					var beachMarker = new google.maps.Marker({
+					var marker = new google.maps.Marker({
 						position: busLatLng,
 						map: map,
-						icon: "http://tutujibus.com/image/busstop32.png"
+						icon: "http://tutujibus.com/image/busstop32.png",
+						title:data.busstop[i].name
 					});
+
+					var infowindow = new google.maps.InfoWindow({
+					    content: "<div>"+data.busstop[i].name+"</div>"
+					});
+
+					google.maps.event.addListener(marker, 'click', function() {
+					  infowindow.open(map,this);
+					});
+
 				}
 			});
 	}

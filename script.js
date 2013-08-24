@@ -12,44 +12,32 @@ $(function() {
 	};
 	var map = new google.maps.Map(document.getElementById("map_canvas"),
 		mapOptions);
+	var position;
 
-	//        var map = new OpenLayers.Map("canvas");
-	//        var mapnik = new OpenLayers.Layer.OSM();
-	//        map.addLayer(mapnik);
-
-	//        var lonLat = new OpenLayers.LonLat(133.744519, 34.569651)
-	//            .transform(
-	//                new OpenLayers.Projection("EPSG:4326"), 
-	//                new OpenLayers.Projection("EPSG:900913")
-	//            );
-	//        map.setCenter(lonLat, 15);
-
-	// var markers = new OpenLayers.Layer.Markers("Markers");
-	// 	map.addLayer(markers);
-	// var marker = new OpenLayers.Marker(
-	//    	new OpenLayers.LonLat(139.76, 35.68)
-	//        .transform(
-	//            new OpenLayers.Projection("EPSG:4326"), 
-	//            new OpenLayers.Projection("EPSG:900913")
-	//        )
-	//    );
-	// 	markers.addMarker(marker);
-
-
-	$.getJSON("http://tutujibus.com/busstopLookup.php?rosenid=1&callback=?",
-		function(data) {
-			for (var i in data.busstop) {
-				var busstop=data.busstop[i];
-				  var myLatLng = new google.maps.LatLng( busstop.latitude,busstop.longitude);
-				  var beachMarker = new google.maps.Marker({
-				      position: myLatLng,
-				      map: map
-				  });
-
-
-
-
-				console.log(data.busstop[i].latitude);
-			}
+	navigator.geolocation.getCurrentPosition(function(_position) {
+		position = _position;
+		var myLatLng = new google.maps.LatLng(busstop.latitude, busstop.longitude);
+		var beachMarker = new google.maps.Marker({
+			position: myLatLng,
+			map: map,
 		});
+
+		console.log(position.coords.latitude);
+	});
+
+
+	for (var i = 1; i < 10; i++) {
+		$.getJSON("http://tutujibus.com/busstopLookup.php?rosenid=" + i + "&callback=?",
+			function(data) {
+				for (var i in data.busstop) {
+					var busstop = data.busstop[i];
+					var busLatLng = new google.maps.LatLng(busstop.latitude, busstop.longitude);
+					var beachMarker = new google.maps.Marker({
+						position: busLatLng,
+						map: map,
+						icon: "http://tutujibus.com/image/busstop32.png"
+					});
+				}
+			});
+	}
 });

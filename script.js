@@ -4,7 +4,7 @@ $(function() {
 	/* 地図のオプション設定 */
 	var mapOptions = {
 		/*初期のズーム レベル */
-		zoom: 15,
+		zoom: 18,
 		/* 地図の中心点 */
 		center: latlng,
 		/* 地図タイプ */

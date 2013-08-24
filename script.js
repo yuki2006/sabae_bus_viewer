@@ -1,10 +1,22 @@
 $(function() {
+	var labelMap= new Array();
+
+	$.get("csv/out.csv",function(csvdata){
+	  csvdata = csvdata.replace("/\r/gm", "");
+       var a = csvdata.split(String.fromCharCode(10));
+      for (var i in a) {
+      	var tmp = a[i].split(",");
+
+      	labelMap[tmp[0]]=tmp[1];
+      };
+	});
+
 	/* 緯度・経度：日本, 表参道駅（東京）*/
 	var latlng = new google.maps.LatLng(35.94267, 136.199032);
 	/* 地図のオプション設定 */
 	var mapOptions = {
 		/*初期のズーム レベル */
-		zoom: 18,
+		zoom: 17,
 		/* 地図の中心点 */
 		center: latlng,
 		/* 地図タイプ */
@@ -22,31 +34,33 @@ $(function() {
 
 				for (var i in data.elements) {
 					var p = data.elements[i];
+						var pos = new google.maps.LatLng(p.lat, p.lon);
+						var marker = new google.maps.Marker({
+							position: pos,
+							map: map,
+							title: p.tags.name
+						});
+
+						function getEvent(p){
+							return function(){
+									var tagHTML = p.tags.name;
+								if (p.tags.phone) {
+									tagHTML += "<br />phone " + p.tags.phone
+								}
+								if (p.tags.website) {
+									tagHTML += "<br />Website <a href='" + p.tags.website + "'>" + p.tags.website + "</a>"
+								}
+
+								var infowindow = new google.maps.InfoWindow({
+									content: tagHTML
+								});
+							
+								infowindow.open(map, this);							
+							}
+						}
 
 
-					var tagHTML = p.tags.name;
-					if (p.tags.phone) {
-						tagHTML += "<br />phone " + p.tags.phone
-					}
-					if (p.tags.website) {
-						tagHTML += "<br />Website <a href='" + p.tags.website + "'>" + p.tags.website + "</a>"
-					}
-
-
-					var pos = new google.maps.LatLng(p.lat, p.lon);
-					var marker = new google.maps.Marker({
-						position: pos,
-						map: map,
-						title: p.tags.name
-					});
-
-					var infowindow = new google.maps.InfoWindow({
-						content: tagHTML
-					});
-
-					google.maps.event.addListener(marker, 'click', function() {
-						infowindow.open(map, this);
-					});
+					google.maps.event.addListener(marker, 'click', getEvent(p))
 
 				};
 		});
@@ -82,7 +96,7 @@ $(function() {
 					});
 
 					var infowindow = new google.maps.InfoWindow({
-						content: "<div>" + data.busstop[i].name + "</div>"
+						content: "<div>" + data.busstop[i].name+":" +labelMap[data.busstop[i].name]+ "</div>"
 					});
 
 					google.maps.event.addListener(marker, 'click', function() {

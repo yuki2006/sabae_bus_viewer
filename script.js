@@ -21,42 +21,68 @@ $(function() {
 			position: myLatLng,
 			map: map,
 		});
-		var lat=(position.latitude+"").substring(0,8);
-		var lon=(position.longitude+"").substring(0,8);
-		var type="amenity=restaurant"
-		var url='http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];(node(around:250,'+lat+','+lon+')['+type+'];way(around:250,'+lat+','+lon+')['+type+'];);(._;>;);out body;';
-		$.getJSON(url,function(data){
+		var lat = (position.latitude + "").substring(0, 8);
+		var lon = (position.longitude + "").substring(0, 8);
+		var type = "amenity=restaurant"
+		var url = 'http://overpass.osm.rambler.ru/cgi/interpreter?data=[out:json];(node(around:250,' + lat + ',' + lon + ')[' + type + '];way(around:250,' + lat + ',' + lon + ')[' + type + '];);(._;>;);out body;';
+		$.getJSON(url, function(data) {
 			console.log(url);
 			console.log(data);
 
+			for (var i in data.elements) {
+				var p=data.elements[i];
 
+
+				var tagHTML=p.tags.name;
+				if (p.tags.phone){
+					tagHTML+="<br />phone "+p.tags.phone
+				}
+				if (p.tags.website){
+					tagHTML+="<br />Website <a href='"+p.tags.website+"'>"+p.tags.website+"</a>"
+				}
+
+
+				var pos = new google.maps.LatLng(p.lat, p.lon);
+				var marker = new google.maps.Marker({
+					position: pos,
+					map: map,
+					title: p.tags.name 
+				});
+
+				var infowindow = new google.maps.InfoWindow({
+					content: tagHTML
+				});
+
+				google.maps.event.addListener(marker, 'click', function() {
+					infowindow.open(map, this);
+				});
+			}
 
 		});
 
-		console.log(position.latitude,position.longitude);
+		console.log(position.latitude, position.longitude);
 	});
 
-// バス路線をすべて読み込み
+	// バス路線をすべて読み込み
 	for (var i = 1; i < 10; i++) {
 		$.getJSON("http://tutujibus.com/busstopLookup.php?rosenid=" + i + "&callback=?",
 			function(data) {
 				for (var i in data.busstop) {
-					console.log(data.busstop[i])
 					var busstop = data.busstop[i];
 					var busLatLng = new google.maps.LatLng(busstop.latitude, busstop.longitude);
 					var marker = new google.maps.Marker({
 						position: busLatLng,
 						map: map,
 						icon: "http://tutujibus.com/image/busstop32.png",
-						title:data.busstop[i].name
+						title: data.busstop[i].name
 					});
 
 					var infowindow = new google.maps.InfoWindow({
-					    content: "<div>"+data.busstop[i].name+"</div>"
+						content: "<div>" + data.busstop[i].name + "</div>"
 					});
 
 					google.maps.event.addListener(marker, 'click', function() {
-					  infowindow.open(map,this);
+						infowindow.open(map, this);
 					});
 
 				}
